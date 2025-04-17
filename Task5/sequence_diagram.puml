@@ -1,0 +1,32 @@
+@startuml
+actor "Operator" as Operator
+participant "MES" as MES
+participant "Cache" as Cache
+participant "MES DB" as DB
+
+== Загрузка списка заказов (Cache MISS) ==
+Operator -> MES: 1. Request order list GET /orders
+MES -> Cache: 2. Retrieve <order_list>
+Cache -> DB: 3. Query <order_list>
+DB -> Cache: 4. Return <order_list>
+Cache -> Cache: 5. Update cache with <order_list>
+Cache -> MES: 6. Return <order_list>
+MES -> Operator: 7. Display orders list
+
+== Загрузка списка заказов (Cache HIT) ==
+Operator -> MES: 1. Request order list GET /orders
+MES -> Cache: 2. Retrieve <order_list>
+Cache -> MES: 3. Return cached <order_list>
+MES -> Operator: 4. Display orders list
+
+== Изменение статуса заказа ==
+Operator -> MES: 1. Change order status PUT /orders/<order_id>
+MES -> Cache: 2. Send order updates of <order_id>
+Cache -> Cache: 3. Update cache by <order_id>
+Cache -> DB: 4. Send order updates of <order_id>
+DB -> DB: 5. Update record by <order_id>
+DB -> Cache: 6. Return result status
+Cache -> MES: 7. Return result status
+MES -> Operator: 8. Display the message
+
+@enduml
